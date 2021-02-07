@@ -119,5 +119,5 @@ def save_sample(df, file_name, path='../Data Exploration/samples/'):
     
     import pandas as pd
     sample = df.copy(deep=True)
-    sample.to_csv(path + file_name + '.csv', sep=';')
+    sample.to_csv(path + file_name + '.csv', sep=';', index=False)
     print('Sample saved.')
