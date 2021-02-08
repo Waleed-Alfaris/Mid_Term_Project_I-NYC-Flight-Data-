@@ -75,15 +75,23 @@ for col in col_to_agg:
         X_train.loc[X_train['fl_date']==i, col]= X_train.groupby(by='fl_date').mean()[col][i]
 
 
+# fill y_train na vals
+y_train = y_train.fillna(y_train.mean())
 
 
 
+#stats model
+import statsmodels.api as sm
+exog, endog = sm.add_constant(X_train), y_train
+mod = sm.OLS(endog, exog)
+res = mod.fit()
+
+print(res.summary())
 
 
-##### run into error when trying to fit linreg form sklearn "Input contains NaN, infinity or a value too large for dtype('float64')."
-from sklearn.linear_model import LinearRegression
+# sklearn cross val
+from sklearn.model_selection import cross_val_score
 
-reg = LinearRegression()
+cv_r2 = cross_val_score(reg,X_train,y_train,cv=5,scoring='r2')
 
-
-y = reg.fit(X_train, y_train)
+cv_r2
