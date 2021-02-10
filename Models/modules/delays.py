@@ -11,6 +11,8 @@ def arr_delays(df, agg='monthly', agg_obj='median'):
         dataframe with aggregated information on median arrival delays.'''   
     
     import numpy as np, pandas as pd
+    import math
+    from scipy.stats import mode
     flights = df.copy(deep=True)
     
    
@@ -34,7 +36,7 @@ def arr_delays(df, agg='monthly', agg_obj='median'):
             flights = flights.dropna().reset_index(drop=True)
             flights.rename(columns={'fl_date': 'Month', 
                                     'mkt_unique_carrier': 'Airline', 
-                                    'arr_delay': 'Median Monthly Arrival Delay',
+                                    'arr_delay': 'Monthly Arrival Delay(Median)',
                                     'origin': 'Departing Airport',
                                     'dest': 'Arriving Airport'}, inplace=True)
 
@@ -43,16 +45,28 @@ def arr_delays(df, agg='monthly', agg_obj='median'):
         #mode parameter
         elif agg_obj == 'mode':
             print('Aggregating by monthly mode...')
-            flights = flights.groupby(by=[flights['fl_date'].dt.month, 'mkt_unique_carrier', 'origin', 'dest']).mode()['arr_delay'].reset_index()
+            flights = flights.groupby(by=[flights['fl_date'].dt.month, 'mkt_unique_carrier', 'origin', 'dest'])['arr_delay'].agg(pd.Series.mode).reset_index()
 
             print('Cleaning output...')
             #there are 465 routes in the table that do not exist for some airlines during specific months. Will drop
             flights = flights.dropna().reset_index(drop=True)
             flights.rename(columns={'fl_date': 'Month', 
                                     'mkt_unique_carrier': 'Airline', 
-                                    'arr_delay': 'Median Monthly Arrival Delay',
+                                    'arr_delay': 'Monthly Arrival Delay(Mode)',
                                     'origin': 'Departing Airport',
                                     'dest': 'Arriving Airport'}, inplace=True)
+            
+            mode_list = []
+            for row in range(len(flights)):
+                if 'ndarray' in str(type(flights['Monthly Arrival Delay(Mode)'][row])):
+                    mode_list.append(flights['Monthly Arrival Delay(Mode)'][row].mean()) #if there are multiple modes, take the mean of them all
+                    
+                else:
+                    mode_list.append(flights['Monthly Arrival Delay(Mode)'][row])
+                    
+            
+            flights['Monthly Arrival Delay(Mode)'] = mode_list #replace column with a single number for each row
+            flights.dropna(inplace=True) #drop the 400 or so rows that dont have routes
 
             print('Complete! Aggregated dataframe returned.\n')
             
@@ -107,28 +121,49 @@ def arr_delays(df, agg='monthly', agg_obj='median'):
                                           'origin', 
                                           'dest']).median()['arr_delay'].reset_index()
             
+            print('Cleaning output...')
+            #there are 483 routes in the table that do not exist for some airlines during specific times. Will drop
+            flights = flights.dropna().reset_index(drop=True)
+            flights.rename(columns={'crs_dep_time': 'Scheduled Departure (Hour)',
+                                    'crs_arr_time': 'Scheduled Arrival (Hour)',
+                                    'mkt_unique_carrier': 'Airline', 
+                                    'arr_delay': 'Hourly Arrival Delay(Median)',
+                                    'origin': 'Departing Airport',
+                                    'dest': 'Arriving Airport'}, inplace=True)
+            
         elif agg_obj == 'mode':
             print('Aggregating by hourly mode...')
             flights = flights.groupby(by=[flights['crs_dep_time'].dt.hour, 
                                           flights['crs_arr_time'].dt.hour, 
                                           'mkt_unique_carrier', 
                                           'origin', 
-                                          'dest']).mode()['arr_delay'].reset_index()
+                                          'dest'])['arr_delay'].agg(pd.Series.mode).reset_index()
+            
+            print('Cleaning output...')
+            #there are 483 routes in the table that do not exist for some airlines during specific times. Will drop
+            flights = flights.dropna().reset_index(drop=True)
+            flights.rename(columns={'crs_dep_time': 'Scheduled Departure (Hour)',
+                                    'crs_arr_time': 'Scheduled Arrival (Hour)',
+                                    'mkt_unique_carrier': 'Airline', 
+                                    'arr_delay': 'Hourly Arrival Delay(Mode)',
+                                    'origin': 'Departing Airport',
+                                    'dest': 'Arriving Airport'}, inplace=True)
+            
+            mode_list = []
+            for row in range(len(flights)):
+                if 'ndarray' in str(type(flights['Hourly Arrival Delay(Mode)'][row])):
+                    mode_list.append(flights['Hourly Arrival Delay(Mode)'][row].mean()) #if there are multiple modes, take the mean of them all
+                    
+                else:
+                    mode_list.append(flights['Hourly Arrival Delay(Mode)'][row])
+                    
+            flights['Hourly Arrival Delay(Mode)'] = mode_list #replace column with a single number for each row
+            flights.dropna(inplace=True) #drop the 400 or so rows that dont have routes
             
         else:
             print('Please enter a valid agg_obj. Options are "median" and "mode"')
         
-        
-        print('Cleaning output...')
-        #there are 483 routes in the table that do not exist for some airlines during specific times. Will drop
-        flights = flights.dropna().reset_index(drop=True)
-        flights.rename(columns={'crs_dep_time': 'Scheduled Departure (Hour)',
-                                'crs_arr_time': 'Scheduled Arrival (Hour)',
-                                'mkt_unique_carrier': 'Airline', 
-                                'arr_delay': 'Median Hourly Arrival Delay',
-                                'origin': 'Departing Airport',
-                                'dest': 'Arriving Airport'}, inplace=True)
-        
+              
         print('Complete! Aggregated dataframe returned.\n')
         return flights
     
