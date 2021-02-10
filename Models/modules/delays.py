@@ -34,8 +34,6 @@ def delays(df, agg='monthly', agg_obj='median'):
     #drop columns we don't need
     print('Dropping columns...') 
     flights = flights.loc[:, ['fl_date', 'mkt_unique_carrier', 'origin', 'dest', 'crs_dep_time', 'crs_arr_time', 'arr_delay']]
-    flights['fl_date'] = pd.to_datetime(flights['fl_date'].astype(str), format='%Y-%m-%d') #convert fl_date feature into datetime
-
 
 
     #monthly aggregation parameter
@@ -94,36 +92,6 @@ def delays(df, agg='monthly', agg_obj='median'):
 
     #hourly aggregation paramter
     elif agg == 'hourly':
-
-        #convert crs_dep_time and crs_arrival_time into datetime objects
-        #first have to go through and fix the format of the original columns
-        time_of_day_df = flights[['crs_dep_time', 'crs_arr_time']].astype(str) #convert to string to be able to iterate through indecies
-        col_position = 0 #position of column being changed in reformatting loop below
-
-        #THIS SHOULD BE A FUNCTION. COME BACK TO IT LATER
-        for col in ['crs_dep_time', 'crs_arr_time']: #run on both columns
-
-            print(f'Formatting {col} for datetime object conversion...')        
-            for row in range(len(time_of_day_df)): #iterate through every row
-                if time_of_day_df[col][row] == '2400': 
-                    time_of_day_df.iloc[row, col_position] = '00:00' #change 2400 to 0000 as this is the datetime module standard
-
-                elif len(time_of_day_df[col][row]) == 1:
-                    time_of_day_df.iloc[row, col_position] = '00:0' + time_of_day_df[col][row]
-
-                elif len(time_of_day_df[col][row]) == 2:
-                    time_of_day_df.iloc[row, col_position] = '00:' + time_of_day_df[col][row]
-
-                elif len(time_of_day_df[col][row]) == 3:
-                    time_of_day_df.iloc[row, col_position] = '0' + time_of_day_df[col][row][0] + ':' +time_of_day_df[col][row][1:]
-
-                else:
-                    time_of_day_df.iloc[row, col_position] = time_of_day_df[col][row][0:2] + ':' + time_of_day_df[col][row][2:]
-
-
-            flights[col] = time_of_day_df[col] #replace column in original dataframe with new datetime object column
-            flights[col] = pd.to_datetime(flights[col], format='%H:%M') #convert column to datetime object
-            col_position += 1 #increase col_position to 1 and run again for arr_time
 
 
         if agg_obj == 'median':
@@ -207,36 +175,6 @@ def get_taxi_times(df, agg_obj='median'):
 
     print('Dropping columns...') 
     flights = flights.loc[:, ['crs_dep_time', 'crs_arr_time', 'taxi_out', 'taxi_in', 'origin', 'dest']]        
-
-    #convert crs_dep_time and crs_arrival_time into datetime objects
-    #first have to go through and fix the format of the original columns
-    time_of_day_df = flights[['crs_dep_time', 'crs_arr_time']].astype(str) #convert to string to be able to iterate through indecies
-    col_position = 0 #position of column being changed in reformatting loop below
-
-    #THIS SHOULD BE A FUNCTION. COME BACK TO IT LATER
-    for col in ['crs_dep_time', 'crs_arr_time']: #run on both columns
-
-        print(f'Formatting {col} for datetime object conversion...')        
-        for row in range(len(time_of_day_df)): #iterate through every row
-            if time_of_day_df[col][row] == '2400': 
-                time_of_day_df.iloc[row, col_position] = '00:00' #change 2400 to 0000 as this is the datetime module standard
-
-            elif len(time_of_day_df[col][row]) == 1:
-                time_of_day_df.iloc[row, col_position] = '00:0' + time_of_day_df[col][row]
-
-            elif len(time_of_day_df[col][row]) == 2:
-                time_of_day_df.iloc[row, col_position] = '00:' + time_of_day_df[col][row]
-
-            elif len(time_of_day_df[col][row]) == 3:
-                time_of_day_df.iloc[row, col_position] = '0' + time_of_day_df[col][row][0] + ':' +time_of_day_df[col][row][1:]
-
-            else:
-                time_of_day_df.iloc[row, col_position] = time_of_day_df[col][row][0:2] + ':' + time_of_day_df[col][row][2:]
-
-
-        flights[col] = time_of_day_df[col] #replace column in original dataframe with new datetime object column
-        flights[col] = pd.to_datetime(flights[col], format='%H:%M') #convert column to datetime object
-        col_position += 1 #increase col_position to 1 and run again for arr_time
 
 
     if agg_obj == 'median':
@@ -328,37 +266,6 @@ def get_traffic(df):
     #drop columns we don't need
     print('Dropping columns...') 
     flights = flights.loc[:, ['origin', 'dest', 'crs_dep_time', 'crs_arr_time', 'flights']]
-    
-    
-    #convert crs_dep_time and crs_arrival_time into datetime objects
-    #first have to go through and fix the format of the original columns
-    time_of_day_df = flights[['crs_dep_time', 'crs_arr_time']].astype(str) #convert to string to be able to iterate through indecies
-    col_position = 0 #position of column being changed in reformatting loop below
-
-    #THIS SHOULD BE A FUNCTION. COME BACK TO IT LATER
-    for col in ['crs_dep_time', 'crs_arr_time']: #run on both columns
-
-        print(f'Formatting {col} for datetime object conversion...')        
-        for row in range(len(time_of_day_df)): #iterate through every row
-            if time_of_day_df[col][row] == '2400': 
-                time_of_day_df.iloc[row, col_position] = '00:00' #change 2400 to 0000 as this is the datetime module standard
-
-            elif len(time_of_day_df[col][row]) == 1:
-                time_of_day_df.iloc[row, col_position] = '00:0' + time_of_day_df[col][row]
-
-            elif len(time_of_day_df[col][row]) == 2:
-                time_of_day_df.iloc[row, col_position] = '00:' + time_of_day_df[col][row]
-
-            elif len(time_of_day_df[col][row]) == 3:
-                time_of_day_df.iloc[row, col_position] = '0' + time_of_day_df[col][row][0] + ':' +time_of_day_df[col][row][1:]
-
-            else:
-                time_of_day_df.iloc[row, col_position] = time_of_day_df[col][row][0:2] + ':' + time_of_day_df[col][row][2:]
-
-
-        flights[col] = time_of_day_df[col] #replace column in original dataframe with new datetime object column
-        flights[col] = pd.to_datetime(flights[col], format='%H:%M') #convert column to datetime object
-        col_position += 1 #increase col_position to 1 and run again for arr_time
         
     
     # will find the total number of flights that have departed and arrived at a given airport per hour over the 2 years
