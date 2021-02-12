@@ -27,42 +27,42 @@ def clean_and_split_model_train(df):
     
 
 
-def append_hourly_indecies(df, med_tod_delay_df, mode_tod_delay_df):
+def append_hourly_indecies(df, med_tod_delay_df):
     import pandas as pd, numpy as np
     
     flights = df.copy(deep=True).reset_index(drop=True)
     med_delays = med_tod_delay_df.copy(deep=True).reset_index(drop=True)
-    mode_delays = mode_tod_delay_df.copy(deep=True).reset_index(drop=True)
+#     mode_delays = mode_tod_delay_df.copy(deep=True).reset_index(drop=True)
     
     med_delay_list, mode_delay_list = [], []
     for i in range(len(flights)):
         match_found = False
         
-        if i in np.arange(5000, len(flights), 5000):
+        if i in np.arange(1000, len(flights), 1000):
             print(f'Current iteration: {i} of {len(flights)} total...') #status update every 5000 iteration
             
 
         for j in range(len(med_delays)):
             if all([flights['crs_dep_time'][i].hour == med_delays['Scheduled Departure (Hour)'][j],
                     flights['crs_arr_time'][i].hour == med_delays['Scheduled Arrival (Hour)'][j],
-                    flights['mkt_unique_carrier'][i] == med_delays['Airline'][j],
                     flights['origin'][i] == med_delays['Departing Airport'][j],
-                    flights['dest'][i] == med_delays['Arriving Airport'][j]
                    ]):
                 
                 match_found = True
-                med_delay_list.append(med_delays['Hourly Arrival Delay(Median)'][j])
-                mode_delay_list.append(mode_delays['Hourly Arrival Delay(Mode)'][j])
+                med_delay_list.append(med_delays['Hourly Arrival Delay (Median)'][j])
+#                 mode_delay_list.append(mode_delays['Hourly Arrival Delay (Mode)'][j])
                 break
             
             
         if match_found == False:
-            print(f'No match found for flights row {i}. Filling with NaN')
-            med_delay_list.append(np.nan)
-            mode_delay_list.append(np.nan)
+            print(f'No match found for flights row {i}. Filling with 0')
+            med_delay_list.append(0)
+#             mode_delay_list.append(0)
             
     flights['Median TOD Delay IDX'] = med_delay_list
-    flights['Mode TOD Delay IDX'] = mode_delay_list
+#     flights['Mode TOD Delay IDX'] = mode_delay_list
+    
+    print('Complete. Dataframe returned with columns appended.')
     return flights 
 
 
@@ -70,39 +70,39 @@ def append_hourly_indecies(df, med_tod_delay_df, mode_tod_delay_df):
 
 
 
-def append_monthly_indecies(df, med_toy_delay_df, mode_toy_delay_df):
+def append_monthly_indecies(df, med_toy_delay_df):
     import pandas as pd, numpy as np
     
     flights = df.copy(deep=True).reset_index(drop=True)
     med_delays = med_toy_delay_df.copy(deep=True).reset_index(drop=True)
-    mode_delays = mode_toy_delay_df.copy(deep=True).reset_index(drop=True)
+#     mode_delays = mode_toy_delay_df.copy(deep=True).reset_index(drop=True)
     
     med_delay_list, mode_delay_list = [], []
     for i in range(len(flights)):
         match_found = False
         
-        if i in np.arange(5000, len(flights), 5000):
+        if i in np.arange(2500, len(flights), 2500):
             print(f'Current iteration: {i} of {len(flights)} total...') #status update every 5000 iteration
 
         for j in range(len(med_delays)):
             if all([flights['fl_date'][i].month == med_delays['Month'][j],
-                    flights['mkt_unique_carrier'][i] == med_delays['Airline'][j],
                     flights['origin'][i] == med_delays['Departing Airport'][j],
-                    flights['dest'][i] == med_delays['Arriving Airport'][j]
                    ]):
                 
                 match_found = True
-                med_delay_list.append(delays['Monthly Arrival Delay(Median)'][j])
-                med_delay_list.append(delays['Monthly Arrival Delay(Mode)'][j])
+                med_delay_list.append(med_delays['Monthly Arrival Delay (Median)'][j])
+#                 mode_delay_list.append(mode_delays['Monthly Arrival Delay (Mode)'][j])
                 break
                 
         if match_found == False:
-            print(f'No match found for flights row {i}. Filling with NaN')
-            med_delay_list.append(np.nan)
-            mode_delay_list.append(np.nan)
+            print(f'No match found for flights row {i}. Filling with 0')
+            med_delay_list.append(0)
+#             mode_delay_list.append(0)
             
     flights['Median TOY Delay IDX'] = med_delay_list
-    flights['Mode TOY Delay IDX'] = mode_delay_list
+#     flights['Mode TOY Delay IDX'] = mode_delay_list
+    
+    print('Complete. Dataframe returned with columns appended.')
     return flights
 
 
@@ -120,14 +120,12 @@ def append_taxi_indecies(df, med_tod_taxi_df, mode_tod_taxi_df):
     for i in range(len(flights)):
         match_found = False
         
-        if i in np.arange(5000, len(flights), 5000):
+        if i in np.arange(2500, len(flights), 2500):
             print(f'Current iteration: {i} of {len(flights)} total...') #status update every 5000 iteration
 
         for j in range(len(med_delays)):
             if all([flights['crs_dep_time'][i].hour == med_delays['Scheduled Departure (Hour)'][j],
                     flights['crs_arr_time'][i].hour == med_delays['Scheduled Arrival (Hour)'][j],
-                    flights['origin'][i] == med_delays['Departing Airport'][j],
-                    flights['dest'][i] == med_delays['Arriving Airport'][j]
                    ]):
                 
                 match_found = True
@@ -138,18 +136,20 @@ def append_taxi_indecies(df, med_tod_taxi_df, mode_tod_taxi_df):
                 break
                 
         if match_found == False:
-            print(f'No match found for flights row {i}. Filling with NaN')
-            med_delay_list_in.append(np.nan)
-            med_delay_list_out.append(np.nan)
-            mode_delay_list_in.append(np.nan)
-            mode_delay_list_out.append(np.nan)
+            print(f'No match found for flights row {i}. Filling with 0')
+            med_delay_list_in.append(0)
+            med_delay_list_out.append(0)
+            mode_delay_list_in.append(0)
+            mode_delay_list_out.append(0)
             
             
             
     flights['Mode TOD Taxi-In IDX'] = mode_delay_list_in
     flights['Mode TOD Taxi-Out IDX'] = mode_delay_list_out
-    flights['Median TOD Taxi-In IDX'] = median_delay_list_in
-    flights['Median TOD Taxi-Out IDX'] = median_delay_list_out
+    flights['Median TOD Taxi-In IDX'] = med_delay_list_in
+    flights['Median TOD Taxi-Out IDX'] = med_delay_list_out
+    
+    print('Complete. Dataframe returned with columns appended.')
     return flights
 
 
@@ -165,7 +165,7 @@ def append_traffic_index(df, tod_traffic_df):
     for i in range(len(flights)):
         dep_match_found, arr_match_found = False, False
         
-        if i in np.arange(5000, len(flights), 5000):
+        if i in np.arange(2500, len(flights), 2500):
             print(f'Current iteration: {i} of {len(flights)} total...') #status update every 5000 iteration
 
         for j in range(len(delays)):
@@ -187,16 +187,18 @@ def append_traffic_index(df, tod_traffic_df):
                 
                 
         if dep_match_found == False:
-            print(f'No match found for dep flights row {i}. Filling with NaN')
-            delay_list_dep.append(np.nan)
+            print(f'No match found for dep flights row {i}. Filling with 0')
+            delay_list_dep.append(0)
             
         if arr_match_found == False:
-            print(f'No match found for arr flights row {i}. Filling with NaN')
-            delay_list_arr.append(np.nan)
+            print(f'No match found for arr flights row {i}. Filling with 0')
+            delay_list_arr.append(0)
 
                       
     flights['TOD Dep Traffic IDX'] = delay_list_dep
     flights['TOD Arr Traffic IDX'] = delay_list_arr
+    
+    print('Complete. Dataframe returned with columns appended.')
     return flights
 
 
